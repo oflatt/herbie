@@ -4,7 +4,7 @@
 (require "config.rkt" "errors.rkt" "debug.rkt" "interface.rkt")
 (module+ test (require rackunit))
 
-(provide *start-prog* *all-alts* *output-prec* *var-precs*
+(provide *start-prog* *all-alts* *output-repr* *var-precs*
          reap define-table table-ref table-set! table-remove!
          assert for/append string-prefix call-with-output-files
          take-up-to flip-lists list/true find-duplicates all-partitions
@@ -23,7 +23,7 @@
 (define *all-alts* (make-parameter '()))
 
 ;; Global precision tacking
-(define *output-prec* (make-parameter '()))
+(define *output-repr* (make-parameter '()))
 (define *var-precs* (make-parameter '()))
 
 ;; Various syntactic forms of convenience used in Herbie

@@ -1,6 +1,7 @@
 #lang racket
 
-(require "../common.rkt" "../syntax/syntax.rkt" "../syntax/types.rkt" "../type-check.rkt" "../float.rkt")
+(require "../common.rkt" "../syntax/syntax.rkt" "../syntax/types.rkt" "../type-check.rkt"
+         "../float.rkt" "../interface.rkt")
 
 (provide new-enode enode-merge!
 	 enode-vars refresh-vars! enode-pid
@@ -70,9 +71,9 @@
     [(? value?)
      ;; TODO(interface): Once we allow for mixed-precision expressions,
      ;; we will have to pass through what the precision is
-     (if (set-member? '(binary64 binary32) (*output-prec*))
+     (if (set-member? '(binary64 binary32) (representation-name (*output-repr*)))
        'real
-       (*output-prec*))]
+       (representation-name (*output-repr*)))]
     [(? constant?) (constant-info expr 'type)]
     [(? variable?) 'real] ;; TODO: assumes variable types are real
     [(list 'if cond ift iff)
@@ -83,12 +84,12 @@
 
 (module+ test
   (require rackunit)
-  (parameterize ([*output-prec* 'binary64])
+  (parameterize ([*output-repr* (get-representation 'binary64)])
     (define x (new-enode '1 1))
     (define y (new-enode '2 2))
     (define xplusy (new-enode (list '+ x y) 3))
     (check-equal? (type-of-enode-expr (enode-expr xplusy)) 'real))
-  (parameterize ([*output-prec* 'complex])
+  (parameterize ([*output-repr* (get-representation 'complex)])
     (define xc (new-enode '1+2i 1))
     (define yc (new-enode '2+3i 2))
     (define xcplusyc (new-enode (list '+.c xc yc) 3))

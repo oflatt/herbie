@@ -66,11 +66,12 @@
 ;; Setting up
 (define (setup-prog! prog
                      #:precondition [precondition 'TRUE]
-                     #:precision [precision 'binary64]
+                     #:repr [repr 'binary64]
                      #:specification [specification #f])
-  (*output-prec* precision)
+  (*output-repr* repr)
   ;; TODO(interface): when the syntax checker is udpated, set *var-precs* too
   (*start-prog* prog)
+  (define precision (representation-name repr))
   (rollback-improve!)
   (check-unused-variables (program-variables prog) precondition (program-body prog))
 
@@ -108,14 +109,13 @@
 	(^table^ table*)
 	(void))))
 
-(define (best-alt alts prec)
-  (define repr (get-representation prec))
+(define (best-alt alts repr)
   (argmin (λ (alt) (errors-score (errors (alt-program alt) (*pcontext*) repr)))
 		   alts))
 
 (define (choose-best-alt!)
   (let-values ([(picked table*) (atab-pick-alt (^table^)
-                                  #:picking-func (curryr best-alt (*output-prec*))
+                                  #:picking-func (curryr best-alt (*output-repr*))
                                   #:only-fresh #t)])
     (^next-alt^ picked)
     (^table^ table*)
@@ -125,7 +125,7 @@
 ;; Invoke the subsystems individually
 (define (localize!)
   (timeline-event! 'localize)
-  (define locs (localize-error (alt-program (^next-alt^)) (*output-prec*)))
+  (define locs (localize-error (alt-program (^next-alt^)) (representation-name (*output-repr*))))
   (for/list ([(err loc) (in-dict locs)])
     (timeline-push! 'locations
                     (location-get loc (alt-program (^next-alt^)))
@@ -276,7 +276,7 @@
 ;; Finish iteration
 (define (finalize-iter!)
   (timeline-event! 'prune)
-  (^table^ (atab-add-altns (^table^) (^children^) (*output-prec*)))
+  (^table^ (atab-add-altns (^table^) (^children^) (representation-name (*output-repr*))))
   (timeline-log! 'kept-alts (length (atab-not-done-alts (^table^))))
   (timeline-log! 'done-alts (- (length (atab-all-alts (^table^))) (length (atab-not-done-alts (^table^)))))
   (timeline-log! 'min-error (errors-score (atab-min-errors (^table^))))
@@ -284,7 +284,7 @@
   (void))
 
 (define (inject-candidate! prog)
-  (^table^ (atab-add-altns (^table^) (list (make-alt prog)) (*output-prec*)))
+  (^table^ (atab-add-altns (^table^) (list (make-alt prog)) (representation-name (*output-repr*))))
   (void))
 
 (define (finish-iter!)
@@ -348,7 +348,7 @@
                      #:specification [specification #f])
   (debug #:from 'progress #:depth 1 "[Phase 1 of 3] Setting up.")
   (define repr (get-representation precision))
-  (setup-prog! prog #:specification specification #:precondition precondition #:precision precision)
+  (setup-prog! prog #:specification specification #:precondition precondition #:repr repr)
   (cond
    [(and (flag-set? 'setup 'early-exit)
          (< (errors-score (errors (*start-prog*) (*pcontext*) repr))
@@ -378,7 +378,7 @@
       (timeline-event! 'bsearch)
       (combine-alts option precision)]
      [else
-      (best-alt all-alts precision)]))
+      (best-alt all-alts (get-representation precision))]))
   (timeline-event! 'simplify)
   (define cleaned-alt
     (alt `(λ ,(program-variables (alt-program joined-alt))
