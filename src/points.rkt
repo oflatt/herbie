@@ -151,24 +151,6 @@
     (prepare-points-intervals prog precondition repr)
     (prepare-points-halfpoints prog precondition repr)))
 
-#;(define (prepare-points prog precondition repr)
-  "Given a program, return two lists:
-   a list of input points (each a list of flonums)
-   and a list of exact values for those points (each a flonum)"
-
-  (define sampled-pts (extract-sampled-points (program-variables prog) precondition))
-  (define range-table (condition->range-table precondition))
-
-  (cond
-   [sampled-pts
-    (mk-pcontext sampled-pts (make-exacts prog sampled-pts 'TRUE))]
-   [else
-    (for ([var (program-variables prog)]
-          #:unless (range-table-ref range-table var))
-      (raise-herbie-error "No valid values of variable ~a" var
-                          #:url "faq.html#no-valid-values"))
-    (prepare-points-halfpoints prog precondition repr)]))
-
 (define (point-error out exact repr)
   (if (ordinary-value? out repr)
       (+ 1 (abs (ulp-difference out exact repr)))
