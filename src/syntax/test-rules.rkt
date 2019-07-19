@@ -25,7 +25,7 @@
     [atan-tan-s . (<= (fabs x) ,(/ pi 2))]))
 
 (define (ival-ground-truth fv p repr)
-  (λ (x) (ival-eval (eval-prog `(λ ,fv ,p) 'ival repr) x (representation-name repr))))
+  (λ (x) (ival-eval (eval-prog `(λ ,fv ,p) 'ival repr) x repr)))
 
 (define ((with-hiprec f) x)
   (parameterize ([bf-precision 2000]) (f x)))

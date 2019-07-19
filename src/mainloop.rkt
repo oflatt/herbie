@@ -66,7 +66,7 @@
 ;; Setting up
 (define (setup-prog! prog
                      #:precondition [precondition 'TRUE]
-                     #:repr [repr 'binary64]
+                     #:repr [repr (get-representation 'binary64)]
                      #:specification [specification #f])
   (*output-repr* repr)
   ;; TODO(interface): when the syntax checker is udpated, set *var-precs* too
@@ -78,7 +78,7 @@
   (debug #:from 'progress #:depth 3 "[1/2] Preparing points")
   (timeline-event! 'sample)
   ;; If the specification is given, it is used for sampling points
-  (define context (prepare-points (or specification prog) precondition precision))
+  (define context (prepare-points (or specification prog) precondition repr))
   (^precondition^ precondition)
   (^precision^ precision)
   (*pcontext* context)
@@ -389,7 +389,8 @@
 
 ;; Other tools
 (define (resample! precision)
-  (let ([context (prepare-points (*start-prog*) (^precondition^) precision)])
+  (define repr (get-representation precision))
+  (let ([context (prepare-points (*start-prog*) (^precondition^) repr)])
     (*pcontext* context)
     (^table^ (atab-new-context (^table^) context )))
   (void))

@@ -206,7 +206,7 @@
       (define ctx
         (parameterize ([*num-points* (*binary-search-test-points*)]
                        [*timeline-disabled* true])
-          (prepare-points start-prog `(== ,(caadr start-prog) ,v) precision)))
+          (prepare-points start-prog `(== ,(caadr start-prog) ,v) repr)))
       (< (errors-score (errors prog1 ctx repr))
          (errors-score (errors prog2 ctx repr))))
     (define pt (binary-search-floats pred v1 v2 repr))
