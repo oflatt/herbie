@@ -87,6 +87,7 @@
     expr))
 
 (define (combine-alts best-option precision)
+  (define repr (get-representation precision))
   (match-define (option splitindices alts pts expr _) best-option)
   (match splitindices
    [(list (si cidx _)) (list-ref alts cidx)]
@@ -98,7 +99,7 @@
       (for/fold
           ([expr (program-body (alt-program (list-ref alts (sp-cidx (last splitpoints)))))])
           ([splitpoint (cdr (reverse splitpoints))])
-        `(if ,(mk-<= precision (sp-bexpr splitpoint) (sp-point splitpoint))
+        `(if ,(mk-<= (sp-bexpr splitpoint) (sp-point splitpoint) repr)
              ,(program-body (alt-program (list-ref alts (sp-cidx splitpoint))))
              ,expr)))
 

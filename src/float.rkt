@@ -178,8 +178,8 @@
     (define ->ordinal (representation-repr->ordinal repr))
     (< (->ordinal x1) (->ordinal x2))]))
 
-(define (mk-<= precision var val)
-  (define repr (get-representation precision))
+(define (mk-<= var val repr)
+  (define precision (representation-name repr))
   (define (cast x)
     (match precision
       ['posit8 `(real->posit8 ,x)] ['posit16 `(real->posit16 ,x)] ['posit32 `(real->posit32 ,x)]
