@@ -51,7 +51,7 @@ jobs:
       
       - name: Create tarball
         run: |
-          tar -czvf herbie-${{ matrix.os }}.tar.gz *
+          tar -czvf herbie-${{ matrix.os }}.tar.gz ../herbie
       
       - name: Upload assets
         id: upload-release-asset
