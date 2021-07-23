@@ -36,6 +36,15 @@ jobs:
           - macOS-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install Rust compiler
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            default: true
+            override: true
+            components: rustfmt, clippy
+            
       - name: build egg-herbie
         run: |
           cargo build --release --manifest-path=egg-herbie/Cargo.toml
